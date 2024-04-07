@@ -21,7 +21,6 @@ public class ProductServices {
         produitRepository.findByDesignation(designation);
     }
     public List<Produit> getListeProduct() {
-        produitRepository.findAll();
-        return null;
+        return produitRepository.findAll();
     }
 }

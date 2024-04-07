@@ -1,19 +1,28 @@
 package com.lus.dawm.model;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import org.hibernate.annotations.DiscriminatorFormula;
 
 import java.io.Serializable;
+import java.util.List;
 @Entity
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+/*@DiscriminatorFormula("...")
+@DiscriminatorValue("not null")*/
+@DiscriminatorColumn(name = "dtype")
+
+
 public class Utilisateur implements Serializable {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 3832626162173359411L;
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Id
 	protected int id;
 	protected String nom, prenom, username, pwd;
+
 
 	public int getId() {
 		return id;
@@ -35,7 +44,7 @@ public class Utilisateur implements Serializable {
 		return prenom;
 	}
 
-	public void setPrenom(String prenom) {
+    public void setPrenom(String prenom) {
 		this.prenom = prenom;
 	}
 

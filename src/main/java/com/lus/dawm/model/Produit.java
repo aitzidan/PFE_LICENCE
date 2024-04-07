@@ -22,7 +22,7 @@ public class Produit implements Serializable{
 	
 	private Categorie categorie;
 	
-	private List<LigneCommade> ligneCommades;
+	//private List<LigneCommade> ligneCommades;
 
 	public Long getId() {
 		return id;
@@ -64,13 +64,13 @@ public class Produit implements Serializable{
 		this.prix = prix;
 	}
 
-	public List<LigneCommade> getLigneCommades() {
+	/*public List<LigneCommade> getLigneCommades() {
 		return ligneCommades;
 	}
 
 	public void setLigneCommades(List<LigneCommade> ligneCommades) {
 		this.ligneCommades = ligneCommades;
-	}
+	}*/
 
 	public Categorie getCategorie() {
 		return categorie;

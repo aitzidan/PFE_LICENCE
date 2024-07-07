@@ -63,7 +63,7 @@ public class JwtService {
     }
 
 
-    public String generateToken(Utilisateur user) {
+    public String generateToken(Utilisateur user) {System.out.println(1);
         String token = Jwts
                 .builder()
                 .subject(user.getUsername())

@@ -8,16 +8,18 @@ public class UtilisateurDTO  implements Serializable {
     private String prenom;
     private String username;
     private String pwd;
+    private String email;
 
     // Constructors
     public UtilisateurDTO() {}
 
-    public UtilisateurDTO(int id, String nom, String prenom, String username , String pwd) {
+    public UtilisateurDTO(int id, String nom, String prenom, String username , String pwd , String email) {
         this.id = id;
         this.nom = nom;
         this.prenom = prenom;
         this.username = username;
         this.pwd = pwd;
+        this.email = email;
     }
 
     // Getters and setters
@@ -58,5 +60,12 @@ public class UtilisateurDTO  implements Serializable {
 
     public void setPassword(String pwd) {
         this.pwd = pwd;
+    }
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

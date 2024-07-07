@@ -20,6 +20,8 @@ public class Utilisateur implements UserDetails {
 
 	@Enumerated(value = EnumType.STRING)
 	private Role role;
+	@ManyToOne
+	private Profile idProfile;
 	@OneToMany(mappedBy = "user")
 	private List<Token> tokens;
 	public int getId() {
@@ -82,7 +84,6 @@ public class Utilisateur implements UserDetails {
 		return true;
 	}
 
-
 	public void setUsername(String username) {
 		this.username = username;
 	}
@@ -109,5 +110,11 @@ public class Utilisateur implements UserDetails {
 	public void setTokens(List<Token> tokens) {
 		this.tokens = tokens;
 	}
+	public Profile getIdProfile() {
+		return idProfile;
+	}
 
+	public void setIdProfile(Profile idProfile) {
+		this.idProfile = idProfile;
+	}
 }

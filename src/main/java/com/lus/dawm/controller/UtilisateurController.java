@@ -67,11 +67,11 @@ public class UtilisateurController {
         }else{
             newUser.setPassword(userServices.hashedPwd(newUser.getPassword()));
             Utilisateur user = userServices.addUser(newUser);
-            return new ResponseEntity<>(user, HttpStatus.CREATED);
+            return new ResponseEntity<>(user,HttpStatus.CREATED);
         }
     }
 
-    @PostMapping("/authentification")
+    @PostMapping("/authentification/")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody Utilisateur user) {
         return ResponseEntity.ok(authService.authenticate(user));
     }
@@ -111,7 +111,55 @@ public class UtilisateurController {
     //TODO:ProfileMethos
     @PostMapping("/profile")
     public ResponseEntity addProfile(@RequestBody JsonNode data) {
+        String codeMessage = "ERROR";
+        try {
+            /*if (bindingResult.hasErrors()) {
+                List<String> errorMessages = bindingResult.getFieldErrors().stream()
+                        .map(FieldError::getDefaultMessage)
+                        .collect(Collectors.toList());
+                String combinedErrorMessage = String.join(", ", errorMessages);
+                StatusMessage errorStatusMessage = new StatusMessage("DATA_ERROR", combinedErrorMessage);
+                return new ResponseEntity<>(errorStatusMessage, HttpStatus.BAD_REQUEST);
+            }*/
+            JsonNode profile = data.get("profile");
+            String profileName = profile.get("nom").asText();
+            JsonNode rolesList = data.get("role");
 
+            if(this.userServices.loadProfileByName(profileName) == null){
+                if(!rolesList.isEmpty()){
+                    Profile profileEntity =  this.userServices.saveProfile(profileName);
+                    //this is listeRole
+                    List<ListeRole> listeRoles = this.userServices.getListeRole();
+                    for (ListeRole role : listeRoles) {
+                        Integer roleId = role.getId();
+                        Long idR = Long.valueOf(roleId);
+                        ListeRole listeRoleOpt = this.userServices.findRole(idR);
+                        Integer etat = 0;
+                        for (JsonNode i : rolesList){
+                            if(i.asInt() == roleId){ // Use asInt() to get the integer value from JsonNode
+                                etat = 1;
+                                break;
+                            }
+                        }
+                        this.userServices.saveRoleProfile(profileEntity , listeRoleOpt , etat);
+                        codeMessage = "OK";
+                    }
+                }else{
+                    codeMessage = "EMPTY_DATA";
+                }
+            }else{
+                codeMessage="EXIST_DEJA";
+            }
+            return new ResponseEntity<>(MessageService.message(codeMessage),HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            codeMessage = "ERROR";
+            e.printStackTrace();
+            return new ResponseEntity<>(MessageService.message(codeMessage),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity updateProfile(@RequestBody JsonNode data) {
         String codeMessage = "ERROR";
         try {
             /*if (bindingResult.hasErrors()) {

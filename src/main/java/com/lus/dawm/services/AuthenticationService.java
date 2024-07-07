@@ -62,29 +62,30 @@ public class AuthenticationService {
 
     public AuthenticationResponse authenticate(Utilisateur request)  {
         try {
-            System.out.println(request.getUsername());
-        System.out.println(request.getPassword());
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            (request.getPassword())
+                    )
+            );
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
+            // If authentication is successful, find the user in the repository
+            Utilisateur user = repository.findByUsername(request.getUsername());
 
-        System.out.println(2);
-        Utilisateur user = repository.findByUsername(request.getUsername());
-        String jwt = jwtService.generateToken(user);
+            // Generate a JWT token for the authenticated user
+            String jwt = jwtService.generateToken(user);
+            System.out.println(2);
+            // Revoke any previous tokens associated with the user
+            revokeAllTokenByUser(user);
 
-        revokeAllTokenByUser(user);
-        saveUserToken(jwt, user);
+            // Save the new token for the user
+            saveUserToken(jwt, user);
 
-        return new AuthenticationResponse(jwt, "User login was successful");
+            return new AuthenticationResponse(jwt, "User login was successful");
         } catch (AuthenticationException e) {
             // Handle authentication failure
             return new AuthenticationResponse(null, "Authentication failed: " + e.getMessage());
         }
-
     }
     private void revokeAllTokenByUser(Utilisateur user) {
         List<Token> validTokens = tokenRepository.findAllTokensByUser(user.getId());

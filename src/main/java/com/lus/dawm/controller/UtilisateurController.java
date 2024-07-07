@@ -1,6 +1,10 @@
 
 package com.lus.dawm.controller;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,6 +26,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 public class UtilisateurController {
@@ -60,12 +65,44 @@ public class UtilisateurController {
         return ResponseEntity.ok(utilisateursList);
     }
     @PostMapping("/utilisateurs")
-    public ResponseEntity<Utilisateur> addUsers(@RequestBody Utilisateur newUser) {
-        List<Utilisateur> findUser =  userServices.getUserByEmail(newUser.getEmail());
-        if(!findUser.isEmpty()){
+    public ResponseEntity<Utilisateur> addUsers(
+            @ModelAttribute Utilisateur newUser ,
+            @RequestParam("idProfile") Long idProfile,
+            @RequestParam("image") MultipartFile image) {
+
+        List<Utilisateur> findUserByEmail =  userServices.getUserByEmail(newUser.getEmail());
+        Utilisateur findUserByUsername =  userServices.getUserByUsername(newUser.getUsername());
+
+        if(!findUserByEmail.isEmpty() || (findUserByUsername != null) ){
             return new ResponseEntity<>(HttpStatus.ALREADY_REPORTED);
         }else{
             newUser.setPassword(userServices.hashedPwd(newUser.getPassword()));
+
+            Profile findProfile =  userServices.getOneProfile(idProfile);
+            newUser.setIdProfile(findProfile);
+
+            // Handle file upload
+            if (image != null && !image.isEmpty()) {
+                try {
+                    // Define the path to save the image
+                    String directory = "src/main/resources/static/images";
+                    String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+                    Path path = Paths.get(directory, fileName);
+
+                    // Create the directory if it does not exist
+                    Files.createDirectories(path.getParent());
+
+                    // Save the file to the directory
+                    Files.write(path, image.getBytes());
+
+                    // Set the image URL in the user
+                    newUser.setUrlImage("/images/" + fileName);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            }
+
             Utilisateur user = userServices.addUser(newUser);
             return new ResponseEntity<>(user,HttpStatus.CREATED);
         }
@@ -84,21 +121,76 @@ public class UtilisateurController {
             return new ResponseEntity<>(user, HttpStatus.OK);
         }
     }
+//    @PutMapping("/utilisateurs/{id}")
+//    public Utilisateur updateUser(@RequestBody Utilisateur newUser, @PathVariable Long id) {
+//        return userServices.getOneUser(id)
+//                .map(user -> {
+//                    user.setNom(newUser.getNom());
+//                    user.setPrenom(newUser.getPrenom());
+//                    user.setUsername(newUser.getUsername());
+//                    user.setPassword(newUser.getPassword());
+//                    user.setEmail(newUser.getEmail());
+//                    return repository.save(user);
+//                })
+//                .orElseGet(() -> {
+//                    return null;
+//                });
+//    }
     @PutMapping("/utilisateurs/{id}")
-    public Utilisateur updateUser(@RequestBody Utilisateur newUser, @PathVariable Long id) {
-        return userServices.getOneUser(id)
-                .map(user -> {
-                    user.setNom(newUser.getNom());
-                    user.setPrenom(newUser.getPrenom());
-                    user.setUsername(newUser.getUsername());
-                    user.setPassword(newUser.getPassword());
-                    user.setEmail(newUser.getEmail());
-                    return repository.save(user);
-                })
-                .orElseGet(() -> {
-                    return null;
-                });
+    public ResponseEntity<Utilisateur> updateUser(
+            @PathVariable int id,
+            @ModelAttribute Utilisateur updatedUser,
+            @RequestParam("idProfile") Long idProfile,
+            @RequestParam(value = "image", required = false) MultipartFile image) {
+
+        Utilisateur existingUser = userServices.getOneUser(id);
+        if (existingUser == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        // Update user fields
+        existingUser.setNom(updatedUser.getNom());
+        existingUser.setPrenom(updatedUser.getPrenom());
+        existingUser.setUsername(updatedUser.getUsername());
+        existingUser.setEmail(updatedUser.getEmail());
+        existingUser.setAdresse(updatedUser.getAdresse());
+        existingUser.setRole(updatedUser.getRole());
+
+        // Update profile
+        Profile findProfile = userServices.getOneProfile(idProfile);
+        existingUser.setIdProfile(findProfile);
+
+        // Update password if provided
+        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+            existingUser.setPassword(userServices.hashedPwd(updatedUser.getPassword()));
+        }
+
+        // Handle file upload if a new image is provided
+        if (image != null && !image.isEmpty()) {
+            try {
+                // Define the path to save the image
+                String directory = "src/main/resources/static/images";
+                String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+                Path path = Paths.get(directory, fileName);
+
+                // Create the directory if it does not exist
+                Files.createDirectories(path.getParent());
+
+                // Save the file to the directory
+                Files.write(path, image.getBytes());
+
+                // Set the image URL in the user
+                existingUser.setUrlImage("/images/" + fileName);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        Utilisateur user = repository.save(existingUser);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
+
     @DeleteMapping("/utilisateurs/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable int id) {
         Utilisateur deletedUser = userServices.deleteUser(id);

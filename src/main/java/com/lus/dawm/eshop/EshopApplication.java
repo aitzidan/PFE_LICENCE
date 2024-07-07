@@ -1,5 +1,6 @@
 package com.lus.dawm.eshop;
 
+import com.lus.dawm.configuration.FileUploadConfig;
 import com.lus.dawm.controller.ClientController;
 import com.lus.dawm.controller.Home;
 import com.lus.dawm.controller.UtilisateurController;
@@ -25,6 +26,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ComponentScan(basePackageClasses= UtilisateurService.class)
 @ComponentScan(basePackageClasses= SecurityConfig.class)
 @ComponentScan(basePackageClasses= SpringFoxConfig.class)
+@ComponentScan(basePackageClasses= FileUploadConfig.class)
+
 @EnableJpaRepositories(basePackages = {"com.lus.dawm.repository"})
 @EntityScan(basePackages = {"com.lus.dawm.model"})
 @ComponentScan(basePackages = {"com.lus.dawm.services"})

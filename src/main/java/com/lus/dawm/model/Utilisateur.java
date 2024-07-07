@@ -1,4 +1,5 @@
 package com.lus.dawm.model;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -7,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
 @Entity
 @Table(name = "utilisateur")
 @DiscriminatorColumn(name = "dtype")
@@ -18,6 +20,8 @@ public class Utilisateur implements UserDetails {
 	protected int id;
 	protected String nom,email , prenom, username, pwd;
 
+	protected String urlImage;
+	protected String adresse;
 	@Enumerated(value = EnumType.STRING)
 	private Role role;
 	@ManyToOne
@@ -54,6 +58,14 @@ public class Utilisateur implements UserDetails {
 	public void setPrenom(String prenom) {
 		this.prenom = prenom;
 	}
+	public String getAdresse() {
+		return adresse;
+	}
+
+	public void setAdresse(String adresse) {
+		this.adresse = adresse;
+	}
+
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -116,5 +128,13 @@ public class Utilisateur implements UserDetails {
 
 	public void setIdProfile(Profile idProfile) {
 		this.idProfile = idProfile;
+	}
+	public String getUrlImage() {
+		return urlImage;
+	}
+
+
+	public void setUrlImage(String urlImage) {
+		this.urlImage = urlImage;
 	}
 }

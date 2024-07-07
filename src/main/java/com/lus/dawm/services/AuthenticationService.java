@@ -74,7 +74,6 @@ public class AuthenticationService {
 
             // Generate a JWT token for the authenticated user
             String jwt = jwtService.generateToken(user);
-            System.out.println(2);
             // Revoke any previous tokens associated with the user
             revokeAllTokenByUser(user);
 

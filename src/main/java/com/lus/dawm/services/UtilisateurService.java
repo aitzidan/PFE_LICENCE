@@ -78,6 +78,11 @@ public class UtilisateurService {
         List<Utilisateur> utilisateurs = (List<Utilisateur>) utilisateurRepository.findByEmail(email);
         return (List<Utilisateur>) utilisateurs;
     }
+    public Utilisateur getUserByUsername(String username) {
+        Utilisateur utilisateurs = (Utilisateur) utilisateurRepository.findByUsername(username);
+        return (Utilisateur) utilisateurs;
+    }
+
     public Optional<Utilisateur> getOneUser(Long id) {
         return utilisateurRepository.findById(id);
     }
